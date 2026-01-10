@@ -4688,11 +4688,11 @@
 
 【输出格式要求】
 你现在是在微信里和用户聊天。请用口语化、自然的方式回复。
-你可以一次发多条消息，用JSON数组格式返回，每条消息是一个对象。
-格式: [{"type":"text","content":"消息内容"},{"type":"voice_message","content":"语音内容"}]
-type可以是"text"(文字)或"voice_message"(语音)。
-如果只想发一条普通文字消息，也可以直接返回文字，不用JSON。
-语音消息要口语化，适合说出来的话。`;
+你的回复必须是JSON数组格式，以 [ 开头，以 ] 结尾。
+数组中每个对象代表一条消息，格式: {"type":"类型","content":"内容"}
+type只能是"text"(文字)或"voice_message"(语音)，你可以自由选择。
+示例: [{"type":"text","content":"在干嘛呀"},{"type":"voice_message","content":"想你了"}]
+重要：直接输出JSON数组，不要在JSON前后添加任何解释或其他文字。`;
             }
 
             // 时间感知
@@ -4736,7 +4736,11 @@ type可以是"text"(文字)或"voice_message"(语音)。
             // 尝试解析JSON数组
             try {
                 const trimmed = content.trim();
+                // 先试整个文本是不是JSON
                 if (trimmed.startsWith('[')) {
+                    replies = JSON.parse(trimmed);
+                } else {
+                    // 从文本中找JSON数组（兜底：万一AI在前面加了废话）
                     const match = trimmed.match(/\[[\s\S]*\]/);
                     if (match) {
                         replies = JSON.parse(match[0]);
